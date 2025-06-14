@@ -57,8 +57,8 @@
 ### Installation
 
 ```sh
-git clone https://github.com/yourusername/crypto-chat-assistant.git
-cd crypto-chat-assistant
+git clone https://github.com/harshcrop/crypto-ai/
+cd crypto-ai
 npm install
 # or
 yarn
