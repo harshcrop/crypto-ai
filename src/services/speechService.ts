@@ -1,17 +1,8 @@
 class SpeechService {
   private synthesis: SpeechSynthesis;
-  private recognition: SpeechRecognition | null = null;
 
   constructor() {
     this.synthesis = window.speechSynthesis;
-    
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      this.recognition = new SpeechRecognition();
-      this.recognition.continuous = false;
-      this.recognition.interimResults = false;
-      this.recognition.lang = 'en-US';
-    }
   }
 
   speak(text: string): void {
@@ -30,26 +21,35 @@ class SpeechService {
 
   async startListening(): Promise<string> {
     return new Promise((resolve, reject) => {
-      if (!this.recognition) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
         reject(new Error('Speech recognition not supported'));
         return;
       }
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
 
-      this.recognition.onresult = (event) => {
+      recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         resolve(transcript);
       };
 
-      this.recognition.onerror = (event) => {
+      recognition.onerror = (event) => {
         reject(new Error(`Speech recognition error: ${event.error}`));
       };
 
-      this.recognition.start();
+      recognition.onend = () => {
+        // Optionally handle end of listening
+      };
+
+      recognition.start();
     });
   }
 
   isSupported(): boolean {
-    return !!(this.synthesis && this.recognition);
+    return !!(this.synthesis && (window.SpeechRecognition || window.webkitSpeechRecognition));
   }
 }
 
